@@ -3,7 +3,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanstackDevtools } from '@tanstack/react-devtools'
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 
-import { Header } from '../components/header'
+import { Header } from '../components/Header'
 
 import type { QueryClient } from '@tanstack/react-query'
 

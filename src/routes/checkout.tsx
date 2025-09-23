@@ -1,18 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { calculateShipping, calculateTax, orderApi } from '../services/api'
+import { getCartFromStorage } from '../services/cart'
+import type { CartItem } from '../services/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { TypographyHeading } from '@/components/ui/typography'
-import { useState, useEffect } from 'react'
-
-import {
-  calculateTax,
-  calculateShipping,
-  orderApi,
-  type CartItem,
-} from '../services/api'
-
-import { getCartFromStorage } from '../services/cart'
 
 export const Route = createFileRoute('/checkout')({
   component: CheckoutPage,
@@ -22,7 +16,7 @@ function CheckoutPage() {
   const navigate = useNavigate()
 
   const [currentStep, setCurrentStep] = useState(1)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [cartItems, setCartItems] = useState<Array<CartItem>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [firstName, setFirstName] = useState('')

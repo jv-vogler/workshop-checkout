@@ -1,18 +1,19 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { TypographyHeading } from '@/components/ui/typography'
-import { useState, useEffect } from 'react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 
-import { calculateTax, calculateShipping, type CartItem } from '../services/api'
-
+import { calculateShipping, calculateTax } from '../services/api'
 import { getCartFromStorage, saveCartToStorage } from '../services/cart'
+import type { CartItem } from '../services/api'
+
+import { TypographyHeading } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/cart')({
   component: CartPage,
 })
 
 function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [cartItems, setCartItems] = useState<Array<CartItem>>([])
   const [loading, setLoading] = useState(true)
 
   const [subtotal, setSubtotal] = useState(0)
@@ -67,7 +68,7 @@ function CartPage() {
     recalculateTotals(updatedCart)
   }
 
-  const recalculateTotals = (cart: CartItem[]) => {
+  const recalculateTotals = (cart: Array<CartItem>) => {
     const newSubtotal = cart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
