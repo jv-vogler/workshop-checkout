@@ -18,6 +18,11 @@ export interface Product {
   description: string
   stock: number
   category: ProductCategory
+  discount?: {
+    type: 'percentage' | 'fixed'
+    value: number
+    isActive: boolean
+  }
 }
 
 export type ProductCategory = 'audio' | 'wearables' | 'accessories'

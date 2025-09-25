@@ -71,9 +71,8 @@ function IndexPage() {
   }, [products, selectedCategory, searchQuery])
 
   const calculateDisplayPrice = (product: Product) => {
-    const isOnSale = product.id === 2 || product.id === 5
-    if (isOnSale) {
-      return calculateDiscountedPrice(product.price, 10)
+    if (product.discount && product.discount.isActive) {
+      return calculateDiscountedPrice(product.price, product.discount.value)
     }
     return product.price
   }

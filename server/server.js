@@ -38,6 +38,11 @@ const products = [
     description: 'Advanced smartwatch with health monitoring',
     stock: 5,
     category: 'wearables',
+    discount: {
+      type: 'percentage',
+      value: 10,
+      isActive: true,
+    },
   },
   {
     id: 3,
@@ -68,6 +73,11 @@ const products = [
     description: 'Multi-port USB-C hub with 4K HDMI output',
     stock: 8,
     category: 'accessories',
+    discount: {
+      type: 'percentage',
+      value: 10,
+      isActive: true,
+    },
   },
   {
     id: 6,
