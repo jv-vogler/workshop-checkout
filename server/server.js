@@ -1,5 +1,8 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import swagger from '@fastify/swagger'
+import swaggerUi from '@fastify/swagger-ui'
+import { productSchemas, orderSchemas, healthSchemas } from './schemas.js'
 
 const fastify = Fastify({
   logger: {
@@ -14,8 +17,40 @@ const fastify = Fastify({
 })
 
 await fastify.register(cors, {
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'], // Vite dev server
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+})
+
+await fastify.register(swagger, {
+  openapi: {
+    openapi: '3.0.0',
+    info: {
+      title: 'GenShop API',
+      description: 'API for GenShop',
+      version: '1.0.0',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3001',
+        description: 'Development server',
+      },
+    ],
+    tags: [
+      { name: 'products', description: 'Product related endpoints' },
+      { name: 'orders', description: 'Order related endpoints' },
+      { name: 'health', description: 'Health check endpoints' },
+    ],
+  },
+})
+
+await fastify.register(swaggerUi, {
+  routePrefix: '/docs',
+  uiConfig: {
+    docExpansion: 'list',
+    deepLinking: false,
+  },
+  staticCSP: true,
+  transformSpecificationClone: true,
 })
 
 const products = [
@@ -94,161 +129,142 @@ const products = [
 const simulateDelay = () =>
   new Promise((resolve) => setTimeout(resolve, Math.random() * 500 + 200))
 
-fastify.get('/api/products', async (request, reply) => {
-  await simulateDelay()
+fastify.get(
+  '/api/products',
+  { schema: productSchemas.getProducts },
+  async (request, reply) => {
+    await simulateDelay()
 
-  const { category, search } = request.query
-  let filteredProducts = [...products]
+    const { category, search } = request.query
+    let filteredProducts = [...products]
 
-  if (category && category !== 'all') {
-    filteredProducts = filteredProducts.filter((p) => p.category === category)
-  }
-
-  if (search) {
-    const searchLower = search.toLowerCase()
-    filteredProducts = filteredProducts.filter(
-      (p) =>
-        p.name.toLowerCase().includes(searchLower) ||
-        p.description.toLowerCase().includes(searchLower),
-    )
-  }
-
-  return {
-    success: true,
-    data: filteredProducts,
-    count: filteredProducts.length,
-  }
-})
-
-fastify.get('/api/products/:id', async (request, reply) => {
-  await simulateDelay()
-
-  const { id } = request.params
-  const product = products.find((p) => p.id === parseInt(id))
-
-  if (!product) {
-    reply.code(404)
-    return {
-      success: false,
-      error: 'Product not found',
+    if (category) {
+      filteredProducts = filteredProducts.filter((p) => p.category === category)
     }
-  }
 
-  return {
-    success: true,
-    data: product,
-  }
-})
-
-fastify.get('/api/categories', async (request, reply) => {
-  await simulateDelay()
-
-  const categories = [...new Set(products.map((p) => p.category))]
-
-  return {
-    success: true,
-    data: categories,
-  }
-})
-
-fastify.get('/api/price-range', async (request, reply) => {
-  await simulateDelay()
-
-  const prices = products.map((p) => p.price)
-
-  return {
-    success: true,
-    data: {
-      min: Math.min(...prices),
-      max: Math.max(...prices),
-    },
-  }
-})
-
-fastify.get('/api/products/:id/stock', async (request, reply) => {
-  await simulateDelay()
-
-  const { id } = request.params
-  const { quantity = 1 } = request.query
-
-  const product = products.find((p) => p.id === parseInt(id))
-
-  if (!product) {
-    reply.code(404)
-    return {
-      success: false,
-      error: 'Product not found',
+    if (search) {
+      const searchLower = search.toLowerCase()
+      filteredProducts = filteredProducts.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchLower) ||
+          p.description.toLowerCase().includes(searchLower),
+      )
     }
-  }
 
-  return {
-    success: true,
-    data: {
-      available: product.stock >= parseInt(quantity),
-      stock: product.stock,
-    },
-  }
-})
-
-fastify.post('/api/orders', async (request, reply) => {
-  await simulateDelay()
-
-  const { items, customerInfo, shippingInfo, paymentInfo, totals } =
-    request.body
-
-  // Validate required fields
-  if (!items || !items.length) {
-    reply.code(400)
     return {
-      success: false,
-      error: 'Order must contain at least one item',
+      success: true,
+      data: filteredProducts,
+      count: filteredProducts.length,
     }
-  }
+  },
+)
 
-  if (!customerInfo || !shippingInfo || !paymentInfo) {
-    reply.code(400)
+fastify.get(
+  '/api/products/:id',
+  { schema: productSchemas.getProductById },
+  async (request, reply) => {
+    await simulateDelay()
+
+    const { id } = request.params
+    const product = products.find((p) => p.id === parseInt(id))
+
+    if (!product) {
+      reply.code(404)
+      return {
+        success: false,
+        error: 'Product not found',
+      }
+    }
+
     return {
-      success: false,
-      error: 'Missing required information',
+      success: true,
+      data: product,
     }
-  }
+  },
+)
 
-  const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+fastify.get(
+  '/api/categories',
+  { schema: productSchemas.getCategories },
+  async (request, reply) => {
+    await simulateDelay()
 
-  return {
-    success: true,
-    data: {
-      orderId,
-      status: 'confirmed',
-      estimatedDelivery: new Date(
-        Date.now() + 7 * 24 * 60 * 60 * 1000,
-      ).toISOString(),
-      items: items.length,
-      total: totals?.total || 0,
-    },
-  }
-})
+    const categories = [...new Set(products.map((p) => p.category))]
 
-fastify.get('/api/health', async (request, reply) => {
-  return {
-    success: true,
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-  }
-})
+    return {
+      success: true,
+      data: categories,
+    }
+  },
+)
+
+fastify.post(
+  '/api/orders',
+  { schema: orderSchemas.createOrder },
+  async (request, reply) => {
+    await simulateDelay()
+
+    const { items, customerInfo, shippingInfo, paymentInfo, totals } =
+      request.body
+
+    // Validate required fields
+    if (!items || !items.length) {
+      reply.code(400)
+      return {
+        success: false,
+        error: 'Order must contain at least one item',
+      }
+    }
+
+    if (!customerInfo || !shippingInfo || !paymentInfo) {
+      reply.code(400)
+      return {
+        success: false,
+        error: 'Missing required information',
+      }
+    }
+
+    const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+
+    return {
+      success: true,
+      data: {
+        orderId,
+        status: 'confirmed',
+        estimatedDelivery: new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        items: items.length,
+        total: totals?.total || 0,
+      },
+    }
+  },
+)
+
+fastify.get(
+  '/api/health',
+  { schema: healthSchemas.getHealth },
+  async (request, reply) => {
+    return {
+      success: true,
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+    }
+  },
+)
 
 const start = async () => {
   try {
     const port = process.env.PORT || 3001
     await fastify.listen({ port, host: '0.0.0.0' })
     console.log(`🚀 API Server running on http://localhost:${port}`)
-    console.log(`📊 Available endpoints:`)
-    console.log(`   GET  /api/products`)
-    console.log(`   GET  /api/products/:id`)
-    console.log(`   GET  /api/categories`)
-    console.log(`   GET  /api/price-range`)
-    console.log(`   POST /api/orders`)
-    console.log(`   GET  /api/health`)
+    console.log(`📚 Swagger Documentation: http://localhost:${port}/docs`)
+    console.log('📊 Available endpoints:')
+    console.log(
+      fastify.printRoutes({
+        commonPrefix: false,
+      }),
+    )
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)
