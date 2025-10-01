@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { Link } from '@tanstack/react-router'
 
-import { getCartFromStorage } from '../services/cart'
+import { getCartFromStorage } from '../../services/cart'
 
 export function Header() {
   const [cartCount, setCartCount] = useState(0)

@@ -1,4 +1,5 @@
-import type { CartItem, Product } from './api'
+import type { Product } from '@/core/product'
+import type { CartItem } from './api'
 
 export const getCartFromStorage = (): Array<CartItem> => {
   try {
