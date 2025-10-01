@@ -115,7 +115,7 @@ function IndexPage() {
         <div>
           <label className="block text-sm font-medium mb-2">Category</label>
           <select
-            className="px-3 py-2 border rounded-md"
+            className="px-3 py-1.5 border rounded-md"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >

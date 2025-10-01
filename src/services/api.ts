@@ -1,7 +1,5 @@
-// API configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
-// API response types
 interface ApiResponse<T> {
   success: boolean
   data?: T
@@ -9,7 +7,6 @@ interface ApiResponse<T> {
   count?: number
 }
 
-// Product types
 export interface Product {
   id: number
   name: string
@@ -31,7 +28,6 @@ export interface CartItem extends Product {
   quantity: number
 }
 
-// API error class
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -43,7 +39,6 @@ export class ApiError extends Error {
   }
 }
 
-// Generic fetch wrapper with error handling
 async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -75,16 +70,13 @@ async function apiRequest<T>(
       throw error
     }
 
-    // Network or parsing errors
     throw new ApiError(
       error instanceof Error ? error.message : 'Unknown error occurred',
     )
   }
 }
 
-// Product API functions
 export const productApi = {
-  // Get all products with optional filtering
   async getProducts(filters?: {
     category?: string
     search?: string
@@ -105,36 +97,15 @@ export const productApi = {
     return apiRequest<Array<Product>>(endpoint)
   },
 
-  // Get single product by ID
   async getProduct(id: number): Promise<Product> {
     return apiRequest<Product>(`/products/${id}`)
   },
 
-  // Get available categories
   async getCategories(): Promise<Array<ProductCategory>> {
     return apiRequest<Array<ProductCategory>>('/categories')
   },
-
-  // Get price range
-  async getPriceRange(): Promise<{ min: number; max: number }> {
-    return apiRequest<{ min: number; max: number }>('/price-range')
-  },
-
-  // Check stock availability
-  async checkStock(
-    productId: number,
-    quantity: number = 1,
-  ): Promise<{
-    available: boolean
-    stock: number
-  }> {
-    return apiRequest<{ available: boolean; stock: number }>(
-      `/products/${productId}/stock?quantity=${quantity}`,
-    )
-  },
 }
 
-// Order API functions
 export const orderApi = {
   async submitOrder(orderData: {
     items: Array<CartItem>
@@ -173,7 +144,6 @@ export const orderApi = {
   },
 }
 
-// Health check
 export const healthApi = {
   async check(): Promise<{
     status: string
@@ -183,7 +153,6 @@ export const healthApi = {
   },
 }
 
-// Business logic functions (kept for backward compatibility)
 export const calculateDiscountedPrice = (
   price: number,
   discountPercent: number,
@@ -192,7 +161,7 @@ export const calculateDiscountedPrice = (
 }
 
 export const calculateTax = (subtotal: number): number => {
-  const taxRate = 0.08 // 8% tax
+  const taxRate = 0.08
   return subtotal * taxRate
 }
 
@@ -203,8 +172,3 @@ export const calculateShipping = (subtotal: number): number => {
 // Backward compatibility exports
 export const fetchProducts = () => productApi.getProducts()
 export const fetchProduct = (id: number) => productApi.getProduct(id)
-export const checkStockAvailability = (
-  productId: number,
-  quantity: number = 1,
-) =>
-  productApi.checkStock(productId, quantity).then((result) => result.available)
