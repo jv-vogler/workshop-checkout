@@ -5,8 +5,8 @@ import { calculateShipping, calculateTax } from '../services/api'
 import { getCartFromStorage, saveCartToStorage } from '../services/cart'
 import type { CartItem } from '../services/api'
 
-import { TypographyHeading } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import { TypographyHeading } from '@/ui/components/ui/typography'
+import { Button } from '@/ui/components/ui/button'
 
 export const Route = createFileRoute('/cart')({
   component: CartPage,

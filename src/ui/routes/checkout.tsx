@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react'
 import { calculateShipping, calculateTax, orderApi } from '../services/api'
 import { getCartFromStorage } from '../services/cart'
 import type { CartItem } from '../services/api'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { TypographyHeading } from '@/components/ui/typography'
+import { Button } from '@/ui/components/ui/button'
+import { Input } from '@/ui/components/ui/input'
+import { Label } from '@/ui/components/ui/label'
+import { TypographyHeading } from '@/ui/components/ui/typography'
 
 export const Route = createFileRoute('/checkout')({
   component: CheckoutPage,

@@ -3,8 +3,8 @@ import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 
+import { routeTree } from './routeTree.gen.ts'
 import * as TanStackQueryProvider from './lib/tanstack-query.tsx'
-import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 
