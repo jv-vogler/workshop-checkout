@@ -1,3 +1,5 @@
+import type { Product } from '@/core/product'
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 interface ApiResponse<T> {
@@ -7,24 +9,7 @@ interface ApiResponse<T> {
   count?: number
 }
 
-export interface Product {
-  id: number
-  name: string
-  price: number
-  image: string
-  description: string
-  stock: number
-  category: ProductCategory
-  discount?: {
-    type: 'percentage' | 'fixed'
-    value: number
-    isActive: boolean
-  }
-}
-
-export type ProductCategory = 'audio' | 'wearables' | 'accessories'
-
-export interface CartItem extends Product {
+export interface CartItem extends Product.Type {
   quantity: number
 }
 
@@ -80,7 +65,7 @@ export const productApi = {
   async getProducts(filters?: {
     category?: string
     search?: string
-  }): Promise<Array<Product>> {
+  }): Promise<Array<Product.Type>> {
     const params = new URLSearchParams()
 
     if (filters?.category) {
@@ -94,15 +79,15 @@ export const productApi = {
     const query = params.toString()
     const endpoint = `/products${query ? `?${query}` : ''}`
 
-    return apiRequest<Array<Product>>(endpoint)
+    return apiRequest<Array<Product.Type>>(endpoint)
   },
 
-  async getProduct(id: number): Promise<Product> {
-    return apiRequest<Product>(`/products/${id}`)
+  async getProduct(id: number): Promise<Product.Type> {
+    return apiRequest<Product.Type>(`/products/${id}`)
   },
 
-  async getCategories(): Promise<Array<ProductCategory>> {
-    return apiRequest<Array<ProductCategory>>('/categories')
+  async getCategories(): Promise<Array<Product.Category>> {
+    return apiRequest<Array<Product.Category>>('/categories')
   },
 }
 
@@ -151,13 +136,6 @@ export const healthApi = {
   }> {
     return apiRequest<{ status: string; timestamp: string }>('/health')
   },
-}
-
-export const calculateDiscountedPrice = (
-  price: number,
-  discountPercent: number,
-): number => {
-  return price * (1 - discountPercent / 100)
 }
 
 export const calculateTax = (subtotal: number): number => {

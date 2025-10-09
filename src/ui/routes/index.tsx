@@ -8,8 +8,9 @@ import { useProducts } from '../product/hooks/useProducts'
 import { ProductFilters } from '../product/components/ProductFilters'
 import { useProductFilters } from '../product/hooks/useProductFilters'
 import { ProductCard } from '../product/components/ProductCard'
-import type { CartItem, Product } from '../services/api'
+import type { CartItem } from '../services/api'
 
+import type { Product } from '@/core/product'
 import { TypographyHeading } from '@/ui/components/ui/typography'
 
 export const Route = createFileRoute('/')({ component: IndexPage })
@@ -26,7 +27,7 @@ function IndexPage() {
     setCart(savedCart)
   }, [])
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: Product.Type) => {
     if (product.stock <= 0) {
       alert('Product is out of stock!')
       return

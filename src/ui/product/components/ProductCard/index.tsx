@@ -1,23 +1,16 @@
-import type { Product } from '@/ui/services/api'
+import { Product } from '@/core/product'
 import { TypographyP } from '@/ui/components/ui/typography'
-import { calculateDiscountedPrice } from '@/ui/services/api'
 import { Button } from '@/ui/components/ui/button'
 
-const calculateDisplayPrice = (product: Product) => {
-  if (product.discount && product.discount.isActive) {
-    return calculateDiscountedPrice(product.price, product.discount.value)
-  }
-  return product.price
-}
-
 type ProductCardProps = {
-  product: Product
-  onAddToCart: (product: Product) => void
+  product: Product.Type
+  onAddToCart: (product: Product.Type) => void
 }
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  const displayPrice = calculateDisplayPrice(product)
-  const isOnSale = displayPrice < product.price
+  const displayPrice = Product.calculateDisplayPrice(product)
+  const isOnSale = Product.isOnSale(product)
+  const stockStatus = Product.getStockStatus(product)
 
   return (
     <div className="border rounded-lg p-4 shadow-md relative">
@@ -63,12 +56,14 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       <Button
         className="w-full mt-4"
         onClick={() => onAddToCart(product)}
-        disabled={product.stock === 0}
+        disabled={stockStatus === Product.StockStatus.OutOfStock}
       >
-        {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+        {stockStatus === Product.StockStatus.OutOfStock
+          ? 'Out of Stock'
+          : 'Add to Cart'}
       </Button>
 
-      {product.stock > 0 && product.stock <= 30 && (
+      {stockStatus === Product.StockStatus.LowStock && (
         <div className="text-orange-600 text-sm mt-2">
           Only {product.stock} left in stock!
         </div>
