@@ -1,4 +1,5 @@
-import type { CartItem, Product } from './api'
+import type { Product } from '@/core/product'
+import type { CartItem } from './api'
 
 export const getCartFromStorage = (): Array<CartItem> => {
   try {
@@ -20,7 +21,7 @@ export const saveCartToStorage = (cart: Array<CartItem>): void => {
 
 export const addToCartWithStorage = (
   cart: Array<CartItem>,
-  product: Product,
+  product: Product.Type,
   updateCartCount?: (count: number) => void,
 ): Array<CartItem> => {
   const existingItem = cart.find((item) => item.id === product.id)
