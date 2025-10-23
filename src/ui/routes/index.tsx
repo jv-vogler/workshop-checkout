@@ -39,30 +39,34 @@ function IndexPage() {
     alert(`${product.name} added to cart!`)
   }
 
-  if (isLoadingProducts) {
+  const contentElement = (() => {
+    if (isLoadingProducts) {
+      return (
+        <div className="flex justify-center items-center min-h-screen">
+          Loading products...
+        </div>
+      )
+    }
+
+    if (error) {
+      return (
+        <div className="flex justify-center items-center min-h-screen text-red-600">
+          Error: {error.message}
+        </div>
+      )
+    }
+
+    if (products.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-gray-500">
+            No products found matching your criteria.
+          </p>
+        </div>
+      )
+    }
+
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        Loading products...
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen text-red-600">
-        Error: {error.message}
-      </div>
-    )
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <TypographyHeading className="text-center mb-8">
-        Our Products
-      </TypographyHeading>
-
-      <ProductFilters filters={filters} setFilters={setFilters} />
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <ProductCard
@@ -72,14 +76,18 @@ function IndexPage() {
           />
         ))}
       </div>
+    )
+  })()
 
-      {products.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">
-            No products found matching your criteria.
-          </p>
-        </div>
-      )}
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <TypographyHeading className="text-center mb-8">
+        Our Products
+      </TypographyHeading>
+
+      <ProductFilters filters={filters} setFilters={setFilters} />
+
+      {contentElement}
     </div>
   )
 }

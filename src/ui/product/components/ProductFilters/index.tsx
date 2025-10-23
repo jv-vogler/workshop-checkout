@@ -1,16 +1,9 @@
+import type { UiProductFilters } from '../../types'
 import { Input } from '@/ui/components/ui/input'
 
 type ProductFiltersProps = {
-  filters: {
-    category: string
-    search: string
-  }
-  setFilters: React.Dispatch<
-    React.SetStateAction<{
-      category: string
-      search: string
-    }>
-  >
+  filters: UiProductFilters
+  setFilters: React.Dispatch<React.SetStateAction<UiProductFilters>>
 }
 
 export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
@@ -23,7 +16,7 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
         <Input
           type="text"
           placeholder="Search products..."
-          value={filters.search}
+          value={filters.search ?? ''}
           onChange={(e) =>
             setFilters((previousFilters) => ({
               ...previousFilters,
@@ -37,11 +30,11 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
         <label className="block text-sm font-medium mb-2">Category</label>
         <select
           className="px-3 py-1.5 border rounded-md"
-          value={filters.category}
+          value={filters.category ?? 'all'}
           onChange={(e) =>
             setFilters((previousFilters) => ({
               ...previousFilters,
-              category: e.target.value,
+              category: e.target.value as UiProductFilters['category'],
             }))
           }
         >

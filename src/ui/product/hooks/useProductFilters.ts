@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useDebounce } from 'use-debounce'
 
+import type { UiProductFilters } from '../types'
+
 export const useProductFilters = () => {
-  const [filters, setFilters] = useState<{
-    category: string
-    search: string
-  }>({
+  const [filters, setFilters] = useState<UiProductFilters>({
     search: '',
     category: 'all',
   })

@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { productApi } from '@/ui/services/api'
+
+import type { UiProductFilters } from '../types'
+import { productQueries } from '@/app/product/queries'
 
 type UseProductsProps = {
-  filters: {
-    category: string
-    search: string
-  }
+  filters: UiProductFilters
 }
 
 export const useProducts = ({ filters }: UseProductsProps) => {
@@ -15,7 +14,7 @@ export const useProducts = ({ filters }: UseProductsProps) => {
 
   const { data, error, isFetching } = useQuery({
     queryKey: ['products', normalizedFilters],
-    queryFn: () => productApi.getProducts(normalizedFilters),
+    queryFn: () => productQueries.getProducts(normalizedFilters),
     initialData: [],
   })
 
