@@ -1,19 +1,24 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
-import { calculateShipping, calculateTax } from '../services/api'
-import { getCartFromStorage, saveCartToStorage } from '../services/cart'
+import {
+  calculateShipping,
+  calculateTax,
+  getCartFromStorage,
+  saveCartToStorage,
+} from '../services/cart'
 import type { CartItem } from '../services/api'
 
 import { TypographyHeading } from '@/ui/components/ui/typography'
 import { Button } from '@/ui/components/ui/button'
+import { Cart } from '@/core/cart'
 
 export const Route = createFileRoute('/cart')({
   component: CartPage,
 })
 
 function CartPage() {
-  const [cartItems, setCartItems] = useState<Array<CartItem>>([])
+  const [cart, setCart] = useState<Cart.Type>(Cart.createEmptyCart())
   const [loading, setLoading] = useState(true)
 
   const [subtotal, setSubtotal] = useState(0)
@@ -22,11 +27,11 @@ function CartPage() {
   const [total, setTotal] = useState(0)
 
   useEffect(() => {
-    const cart = getCartFromStorage()
-    setCartItems(cart)
+    const cartFromStorage = getCartFromStorage()
+    setCart(cartFromStorage)
 
-    const calculatedSubtotal = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+    const calculatedSubtotal = cartFromStorage.lineItems.reduce(
+      (sum, lineItem) => sum + lineItem.item.price * lineItem.quantity,
       0,
     )
     const calculatedTax = calculateTax(calculatedSubtotal)
@@ -47,11 +52,11 @@ function CartPage() {
       return
     }
 
-    const updatedCart = cartItems.map((item) =>
-      item.id === productId ? { ...item, quantity: newQuantity } : item,
+    const updatedCart = cart.lineItems.map((lineItem) =>
+      lineItem.item.id === productId ? { ...lineItem, quantity: newQuantity } : lineItem,
     )
 
-    setCartItems(updatedCart)
+    setCart(updatedCart)
     saveCartToStorage(updatedCart)
 
     recalculateTotals(updatedCart)
@@ -62,8 +67,8 @@ function CartPage() {
       return
     }
 
-    const updatedCart = cartItems.filter((item) => item.id !== productId)
-    setCartItems(updatedCart)
+    const updatedCart = cart.lineItems.filter((lineItem) => lineItem.item.id !== productId)
+    setCart(updatedCart)
     saveCartToStorage(updatedCart)
     recalculateTotals(updatedCart)
   }
@@ -91,7 +96,7 @@ function CartPage() {
     )
   }
 
-  if (cartItems.length === 0) {
+  if (Cart.isEmpty(cart.lineItems)) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <TypographyHeading>Your Cart is Empty</TypographyHeading>
@@ -110,36 +115,36 @@ function CartPage() {
       <TypographyHeading className="mb-6">Shopping Cart</TypographyHeading>
 
       <div className="space-y-4">
-        {cartItems.map((item, index) => (
+        {cart.lineItems.map((lineItem, index) => (
           <div
             key={index}
             className="border rounded-lg p-4 flex items-center space-x-4"
           >
             <img
-              src={item.image}
-              alt={item.name}
+              src={lineItem.item.image}
+              alt={lineItem.item.name}
               className="w-20 h-20 object-cover rounded"
             />
 
             <div className="flex-1">
-              <h3 className="font-semibold">{item.name}</h3>
-              <p className="text-gray-600">${item.price}</p>
+              <h3 className="font-semibold">{lineItem.item.name}</h3>
+              <p className="text-gray-600">${lineItem.item.price}</p>
             </div>
 
             <div className="flex items-center space-x-2">
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                disabled={item.quantity <= 1}
+                onClick={() => updateQuantity(lineItem.item.id, lineItem.quantity - 1)}
+                disabled={lineItem.quantity <= 1}
               >
                 -
               </Button>
-              <span className="px-3 min-w-8 text-center">{item.quantity}</span>
+              <span className="px-3 min-w-8 text-center">{lineItem.quantity}</span>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                onClick={() => updateQuantity(lineItem.item.id, lineItem.quantity + 1)}
               >
                 +
               </Button>
@@ -147,13 +152,13 @@ function CartPage() {
 
             <div className="text-right">
               <p className="font-semibold">
-                ${(item.price * item.quantity).toFixed(2)}
+                ${(lineItem.item.price * lineItem.quantity).toFixed(2)}
               </p>
               <Button
                 size="sm"
                 variant="destructive"
                 className="mt-2"
-                onClick={() => removeItem(item.id)}
+                onClick={() => removeItem(lineItem.item.id)}
               >
                 Remove
               </Button>
@@ -189,7 +194,7 @@ function CartPage() {
             <Button variant="outline">Continue Shopping</Button>
           </Link>
           <Link to="/checkout">
-            <Button disabled={cartItems.length === 0}>
+            <Button disabled={Cart.isEmpty(cart.lineItems)}>
               Proceed to Checkout
             </Button>
           </Link>

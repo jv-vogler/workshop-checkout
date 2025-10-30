@@ -1,17 +1,20 @@
 import type { Product } from '@/core/product'
 import type { CartItem } from './api'
+import type { Cart } from '@/core/cart'
 
-export const getCartFromStorage = (): Array<CartItem> => {
+const emptyCart = 
+
+export const getCartFromStorage = (): Cart.Type => {
   try {
     const cart = localStorage.getItem('cart')
-    return cart ? JSON.parse(cart) : []
+    return cart ? JSON.parse(cart) : {lineItems: []}
   } catch (error) {
     console.error('Error reading cart from localStorage:', error)
-    return []
+    return 
   }
 }
 
-export const saveCartToStorage = (cart: Array<CartItem>): void => {
+export const saveCartToStorage = (cart: Cart.Type): void => {
   try {
     localStorage.setItem('cart', JSON.stringify(cart))
   } catch (error) {
@@ -20,10 +23,10 @@ export const saveCartToStorage = (cart: Array<CartItem>): void => {
 }
 
 export const addToCartWithStorage = (
-  cart: Array<CartItem>,
+  cart: Cart.Type,
   product: Product.Type,
   updateCartCount?: (count: number) => void,
-): Array<CartItem> => {
+): Cart.Type => {
   const existingItem = cart.find((item) => item.id === product.id)
 
   if (existingItem) {
@@ -42,10 +45,10 @@ export const addToCartWithStorage = (
 }
 
 export const removeFromCartWithStorage = (
-  cart: Array<CartItem>,
+  cart: Cart.Type,
   productId: number,
   updateCartCount?: (count: number) => void,
-): Array<CartItem> => {
+): Cart.Type => {
   const newCart = cart.filter((item) => item.id !== productId)
   saveCartToStorage(newCart)
 

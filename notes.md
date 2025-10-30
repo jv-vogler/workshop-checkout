@@ -14,6 +14,18 @@
 
 # Cart
 
+- O que raios é um Cart?
+
+- Refatorar o Header
+
+- Extrair os cálculos da rota de Cart
+
+- Rota de products
+
+- Unificar métodos que estão duplicados
+
+- Como vamos lidar com o localStorage?
+
 # Checkout
 
 # Header

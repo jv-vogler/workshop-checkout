@@ -52,15 +52,3 @@ export const healthApi = {
   },
 }
 
-export const calculateTax = (subtotal: number): number => {
-  const taxRate = 0.08
-  return subtotal * taxRate
-}
-
-export const calculateShipping = (subtotal: number): number => {
-  return subtotal >= 100 ? 0 : 9.99
-}
-
-// Backward compatibility exports
-export const fetchProducts = () => productApi.getProducts()
-export const fetchProduct = (id: number) => productApi.getProduct(id)
