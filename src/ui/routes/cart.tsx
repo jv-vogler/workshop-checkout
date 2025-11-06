@@ -18,7 +18,7 @@ export const Route = createFileRoute('/cart')({
 })
 
 function CartPage() {
-  const [cart, setCart] = useState<Cart.Type>(Cart.createEmptyCart())
+  const [cart, setCart] = useState<Cart.Type>(Cart.create())
   const [loading, setLoading] = useState(true)
 
   const [subtotal, setSubtotal] = useState(0)
@@ -53,7 +53,9 @@ function CartPage() {
     }
 
     const updatedCart = cart.lineItems.map((lineItem) =>
-      lineItem.item.id === productId ? { ...lineItem, quantity: newQuantity } : lineItem,
+      lineItem.item.id === productId
+        ? { ...lineItem, quantity: newQuantity }
+        : lineItem,
     )
 
     setCart(updatedCart)
@@ -67,7 +69,9 @@ function CartPage() {
       return
     }
 
-    const updatedCart = cart.lineItems.filter((lineItem) => lineItem.item.id !== productId)
+    const updatedCart = cart.lineItems.filter(
+      (lineItem) => lineItem.item.id !== productId,
+    )
     setCart(updatedCart)
     saveCartToStorage(updatedCart)
     recalculateTotals(updatedCart)
@@ -96,7 +100,7 @@ function CartPage() {
     )
   }
 
-  if (Cart.isEmpty(cart.lineItems)) {
+  if (Cart.isEmpty(cart)) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <TypographyHeading>Your Cart is Empty</TypographyHeading>
@@ -135,16 +139,22 @@ function CartPage() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => updateQuantity(lineItem.item.id, lineItem.quantity - 1)}
+                onClick={() =>
+                  updateQuantity(lineItem.item.id, lineItem.quantity - 1)
+                }
                 disabled={lineItem.quantity <= 1}
               >
                 -
               </Button>
-              <span className="px-3 min-w-8 text-center">{lineItem.quantity}</span>
+              <span className="px-3 min-w-8 text-center">
+                {lineItem.quantity}
+              </span>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => updateQuantity(lineItem.item.id, lineItem.quantity + 1)}
+                onClick={() =>
+                  updateQuantity(lineItem.item.id, lineItem.quantity + 1)
+                }
               >
                 +
               </Button>
