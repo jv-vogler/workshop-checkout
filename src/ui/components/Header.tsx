@@ -1,23 +1,9 @@
-import { useEffect, useState } from 'react'
-
 import { Link } from '@tanstack/react-router'
 
-import { getCartFromStorage } from '../services/cart'
+import { useCart } from '../cart/contexts/CartContext'
 
 export function Header() {
-  const [cartCount, setCartCount] = useState(0)
-
-  useEffect(() => {
-    const cart = getCartFromStorage()
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0)
-    setCartCount(count)
-
-    setInterval(() => {
-      const updatedCart = getCartFromStorage()
-      const newCount = updatedCart.reduce((sum, item) => sum + item.quantity, 0)
-      setCartCount(newCount)
-    }, 1000)
-  }, [])
+  const { cart } = useCart()
 
   return (
     <header className="p-4 bg-gray-900 shadow-lg border-b border-gray-800">
@@ -57,9 +43,9 @@ export function Header() {
             className="relative p-2 text-blue-400 hover:bg-gray-800 rounded-lg transition-colors"
           >
             🛒
-            {cartCount > 0 && (
+            {cart.lineItems.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
-                {cartCount}
+                {cart.lineItems.length}
               </span>
             )}
           </Link>

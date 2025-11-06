@@ -1,13 +1,26 @@
 import { useQuery } from '@tanstack/react-query'
 
 import type { UiProductFilters } from '../types'
+import type { Product } from '@/core/product'
 import { productQueries } from '@/app/product/queries'
+import { useCart } from '@/ui/cart/contexts/CartContext'
+import { Cart } from '@/core/cart'
 
 type UseProductsProps = {
   filters: UiProductFilters
 }
 
-export const useProducts = ({ filters }: UseProductsProps) => {
+type UseProductsReturn = {
+  products: Array<Product.Type & { stockLeft: number }>
+  error: Error | null
+  isLoadingProducts: boolean
+}
+
+export const useProducts = ({
+  filters,
+}: UseProductsProps): UseProductsReturn => {
+  const { cart } = useCart()
+
   const { category, ...nonCategoryFilters } = filters
 
   const normalizedFilters = category === 'all' ? nonCategoryFilters : filters
@@ -18,5 +31,14 @@ export const useProducts = ({ filters }: UseProductsProps) => {
     initialData: [],
   })
 
-  return { products: data, error, isLoadingProducts: isFetching }
+  const products = data.map((product) => {
+    const quantityInCart = Cart.getLineItemQuantity(cart, product.id) ?? 0
+
+    return {
+      ...product,
+      stockLeft: product.stock - quantityInCart,
+    }
+  })
+
+  return { products, error, isLoadingProducts: isFetching }
 }

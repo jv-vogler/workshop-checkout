@@ -1,102 +1,20 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
 
-import {
-  calculateShipping,
-  calculateTax,
-  getCartFromStorage,
-  saveCartToStorage,
-} from '../services/cart'
-import type { CartItem } from '../services/api'
+import { useCart } from '../cart/contexts/CartContext'
 
 import { TypographyHeading } from '@/ui/components/ui/typography'
 import { Button } from '@/ui/components/ui/button'
-import { Cart } from '@/core/cart'
+import { Product } from '@/core/product'
 
 export const Route = createFileRoute('/cart')({
   component: CartPage,
 })
 
 function CartPage() {
-  const [cart, setCart] = useState<Cart.Type>(Cart.createEmptyCart())
-  const [loading, setLoading] = useState(true)
+  const { cart, subtotal, tax, shipping, total, updateQuantity, removeItem } =
+    useCart()
 
-  const [subtotal, setSubtotal] = useState(0)
-  const [tax, setTax] = useState(0)
-  const [shipping, setShipping] = useState(0)
-  const [total, setTotal] = useState(0)
-
-  useEffect(() => {
-    const cartFromStorage = getCartFromStorage()
-    setCart(cartFromStorage)
-
-    const calculatedSubtotal = cartFromStorage.lineItems.reduce(
-      (sum, lineItem) => sum + lineItem.item.price * lineItem.quantity,
-      0,
-    )
-    const calculatedTax = calculateTax(calculatedSubtotal)
-    const calculatedShipping = calculateShipping(calculatedSubtotal)
-    const calculatedTotal =
-      calculatedSubtotal + calculatedTax + calculatedShipping
-
-    setSubtotal(calculatedSubtotal)
-    setTax(calculatedTax)
-    setShipping(calculatedShipping)
-    setTotal(calculatedTotal)
-    setLoading(false)
-  }, [])
-
-  const updateQuantity = (productId: number, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeItem(productId)
-      return
-    }
-
-    const updatedCart = cart.lineItems.map((lineItem) =>
-      lineItem.item.id === productId ? { ...lineItem, quantity: newQuantity } : lineItem,
-    )
-
-    setCart(updatedCart)
-    saveCartToStorage(updatedCart)
-
-    recalculateTotals(updatedCart)
-  }
-
-  const removeItem = (productId: number) => {
-    if (!confirm('Remove this item from your cart?')) {
-      return
-    }
-
-    const updatedCart = cart.lineItems.filter((lineItem) => lineItem.item.id !== productId)
-    setCart(updatedCart)
-    saveCartToStorage(updatedCart)
-    recalculateTotals(updatedCart)
-  }
-
-  const recalculateTotals = (cart: Array<CartItem>) => {
-    const newSubtotal = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    )
-    const newTax = calculateTax(newSubtotal)
-    const newShipping = calculateShipping(newSubtotal)
-    const newTotal = newSubtotal + newTax + newShipping
-
-    setSubtotal(newSubtotal)
-    setTax(newTax)
-    setShipping(newShipping)
-    setTotal(newTotal)
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        Loading cart...
-      </div>
-    )
-  }
-
-  if (Cart.isEmpty(cart.lineItems)) {
+  if (cart.lineItems.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <TypographyHeading>Your Cart is Empty</TypographyHeading>
@@ -115,28 +33,30 @@ function CartPage() {
       <TypographyHeading className="mb-6">Shopping Cart</TypographyHeading>
 
       <div className="space-y-4">
-        {cart.lineItems.map((lineItem, index) => (
+        {cart.lineItems.map((item, index) => (
           <div
             key={index}
             className="border rounded-lg p-4 flex items-center space-x-4"
           >
             <img
-              src={lineItem.item.image}
-              alt={lineItem.item.name}
+              src={item.product.image}
+              alt={item.product.name}
               className="w-20 h-20 object-cover rounded"
             />
 
             <div className="flex-1">
-              <h3 className="font-semibold">{lineItem.item.name}</h3>
-              <p className="text-gray-600">${lineItem.item.price}</p>
+              <h3 className="font-semibold">{item.product.name}</h3>
+              <p className="text-gray-600">${item.product.price}</p>
             </div>
 
             <div className="flex items-center space-x-2">
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => updateQuantity(lineItem.item.id, lineItem.quantity - 1)}
-                disabled={lineItem.quantity <= 1}
+                onClick={() =>
+                  updateQuantity(item.product.id, item.quantity - 1)
+                }
+                disabled={item.quantity <= 1}
               >
                 -
               </Button>
@@ -144,7 +64,9 @@ function CartPage() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => updateQuantity(lineItem.item.id, lineItem.quantity + 1)}
+                onClick={() =>
+                  updateQuantity(item.product.id, item.quantity + 1)
+                }
               >
                 +
               </Button>
@@ -152,13 +74,16 @@ function CartPage() {
 
             <div className="text-right">
               <p className="font-semibold">
-                ${(lineItem.item.price * lineItem.quantity).toFixed(2)}
+                $
+                {(
+                  Product.calculateDisplayPrice(item.product) * item.quantity
+                ).toFixed(2)}
               </p>
               <Button
                 size="sm"
                 variant="destructive"
                 className="mt-2"
-                onClick={() => removeItem(lineItem.item.id)}
+                onClick={() => removeItem(item.product.id)}
               >
                 Remove
               </Button>
@@ -194,7 +119,7 @@ function CartPage() {
             <Button variant="outline">Continue Shopping</Button>
           </Link>
           <Link to="/checkout">
-            <Button disabled={Cart.isEmpty(cart.lineItems)}>
+            <Button disabled={cart.lineItems.length === 0}>
               Proceed to Checkout
             </Button>
           </Link>

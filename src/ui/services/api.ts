@@ -1,13 +1,9 @@
-import type { Product } from '@/core/product'
+import type { Cart } from '@/core/cart'
 import { apiRequest } from '@/lib/api'
-
-export interface CartItem extends Product.Type {
-  quantity: number
-}
 
 export const orderApi = {
   async submitOrder(orderData: {
-    items: Array<CartItem>
+    items: Array<Cart.LineItem>
     customerInfo: {
       firstName: string
       lastName: string
@@ -51,4 +47,3 @@ export const healthApi = {
     return apiRequest<{ status: string; timestamp: string }>('/health')
   },
 }
-

@@ -1,42 +1,40 @@
-import { useEffect, useState } from 'react'
-
 import { createFileRoute } from '@tanstack/react-router'
 
-import { addToCartWithStorage, getCartFromStorage } from '../services/cart'
+import { toast } from 'react-toastify'
 
 import { useProducts } from '../product/hooks/useProducts'
 import { ProductFilters } from '../product/components/ProductFilters'
 import { useProductFilters } from '../product/hooks/useProductFilters'
 import { ProductCard } from '../product/components/ProductCard'
-import type { CartItem } from '../services/api'
+import { useCart } from '../cart/contexts/CartContext'
 
 import type { Product } from '@/core/product'
 import { TypographyHeading } from '@/ui/components/ui/typography'
+import { Cart } from '@/core/cart'
 
 export const Route = createFileRoute('/')({ component: IndexPage })
 
 function IndexPage() {
-  const [cart, setCart] = useState<Array<CartItem>>([])
+  const { addItem } = useCart()
   const { filters, debouncedFilters, setFilters } = useProductFilters()
   const { products, error, isLoadingProducts } = useProducts({
     filters: debouncedFilters,
   })
 
-  useEffect(() => {
-    const savedCart = getCartFromStorage()
-    setCart(savedCart)
-  }, [])
-
   const handleAddToCart = (product: Product.Type) => {
-    if (product.stock <= 0) {
-      alert('Product is out of stock!')
-      return
+    try {
+      addItem(product, 1)
+
+      toast.success(`${product.name} added to cart!`)
+    } catch (err) {
+      if (err instanceof Cart.Errors.ProductOutOfStockError) {
+        toast.error(`${product.name} is out of stock!`)
+      }
+
+      if (err instanceof Cart.Errors.ProductQuantityExceedsStockError) {
+        toast.error(`No more units left for ${product.name}!`)
+      }
     }
-
-    const updatedCart = addToCartWithStorage([...cart], product)
-    setCart(updatedCart)
-
-    alert(`${product.name} added to cart!`)
   }
 
   const contentElement = (() => {
