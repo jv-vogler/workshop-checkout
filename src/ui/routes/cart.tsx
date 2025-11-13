@@ -1,103 +1,33 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-
-import {
-  calculateShipping,
-  calculateTax,
-  getCartFromStorage,
-  saveCartToStorage,
-} from '../services/cart'
-import type { CartItem } from '../services/api'
 
 import { TypographyHeading } from '@/ui/components/ui/typography'
 import { Button } from '@/ui/components/ui/button'
 import { Cart } from '@/core/cart'
+import { useCart } from '@/ui/cart/hooks/useCart'
 
 export const Route = createFileRoute('/cart')({
   component: CartPage,
 })
 
 function CartPage() {
-  const [cart, setCart] = useState<Cart.Type>(Cart.create())
-  const [loading, setLoading] = useState(true)
+  const { cart, updateQuantity, removeItem, shipping, subtotal, tax, total } =
+    useCart()
 
-  const [subtotal, setSubtotal] = useState(0)
-  const [tax, setTax] = useState(0)
-  const [shipping, setShipping] = useState(0)
-  const [total, setTotal] = useState(0)
-
-  useEffect(() => {
-    const cartFromStorage = getCartFromStorage()
-    setCart(cartFromStorage)
-
-    const calculatedSubtotal = cartFromStorage.lineItems.reduce(
-      (sum, lineItem) => sum + lineItem.item.price * lineItem.quantity,
-      0,
-    )
-    const calculatedTax = calculateTax(calculatedSubtotal)
-    const calculatedShipping = calculateShipping(calculatedSubtotal)
-    const calculatedTotal =
-      calculatedSubtotal + calculatedTax + calculatedShipping
-
-    setSubtotal(calculatedSubtotal)
-    setTax(calculatedTax)
-    setShipping(calculatedShipping)
-    setTotal(calculatedTotal)
-    setLoading(false)
-  }, [])
-
-  const updateQuantity = (productId: number, newQuantity: number) => {
+  const updateCartQuantity = (productId: number, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeItem(productId)
       return
     }
 
-    const updatedCart = cart.lineItems.map((lineItem) =>
-      lineItem.item.id === productId
-        ? { ...lineItem, quantity: newQuantity }
-        : lineItem,
-    )
-
-    setCart(updatedCart)
-    saveCartToStorage(updatedCart)
-
-    recalculateTotals(updatedCart)
+    updateQuantity(productId, newQuantity)
   }
 
-  const removeItem = (productId: number) => {
+  const removeItemFromCart = (productId: number) => {
     if (!confirm('Remove this item from your cart?')) {
       return
     }
 
-    const updatedCart = cart.lineItems.filter(
-      (lineItem) => lineItem.item.id !== productId,
-    )
-    setCart(updatedCart)
-    saveCartToStorage(updatedCart)
-    recalculateTotals(updatedCart)
-  }
-
-  const recalculateTotals = (cart: Array<CartItem>) => {
-    const newSubtotal = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    )
-    const newTax = calculateTax(newSubtotal)
-    const newShipping = calculateShipping(newSubtotal)
-    const newTotal = newSubtotal + newTax + newShipping
-
-    setSubtotal(newSubtotal)
-    setTax(newTax)
-    setShipping(newShipping)
-    setTotal(newTotal)
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        Loading cart...
-      </div>
-    )
+    removeItem(productId)
   }
 
   if (Cart.isEmpty(cart)) {
@@ -140,7 +70,7 @@ function CartPage() {
                 size="sm"
                 variant="outline"
                 onClick={() =>
-                  updateQuantity(lineItem.item.id, lineItem.quantity - 1)
+                  updateCartQuantity(lineItem.item.id, lineItem.quantity - 1)
                 }
                 disabled={lineItem.quantity <= 1}
               >
@@ -153,7 +83,7 @@ function CartPage() {
                 size="sm"
                 variant="outline"
                 onClick={() =>
-                  updateQuantity(lineItem.item.id, lineItem.quantity + 1)
+                  updateCartQuantity(lineItem.item.id, lineItem.quantity + 1)
                 }
               >
                 +
@@ -168,7 +98,7 @@ function CartPage() {
                 size="sm"
                 variant="destructive"
                 className="mt-2"
-                onClick={() => removeItem(lineItem.item.id)}
+                onClick={() => removeItemFromCart(lineItem.item.id)}
               >
                 Remove
               </Button>
@@ -204,9 +134,7 @@ function CartPage() {
             <Button variant="outline">Continue Shopping</Button>
           </Link>
           <Link to="/checkout">
-            <Button disabled={Cart.isEmpty(cart.lineItems)}>
-              Proceed to Checkout
-            </Button>
+            <Button disabled={Cart.isEmpty(cart)}>Proceed to Checkout</Button>
           </Link>
         </div>
       </div>

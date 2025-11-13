@@ -6,6 +6,7 @@ import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { Header } from '../components/Header'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { CartProvider } from '@/ui/cart/context/CartContext'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -14,8 +15,11 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <>
-      <Header />
-      <Outlet />
+      <CartProvider>
+        <Header />
+        <Outlet />
+      </CartProvider>
+      
       <TanstackDevtools
         config={{
           position: 'bottom-left',
