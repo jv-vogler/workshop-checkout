@@ -1,7 +1,7 @@
+import useLocalStorageState from 'use-local-storage-state'
+import { createContext, useMemo } from 'react'
 import { Cart } from '@/core/cart'
 import { Product } from '@/core/product'
-import { createContext, useMemo } from 'react'
-import useLocalStorageState from 'use-local-storage-state'
 
 export const CartContext = createContext<CartContextValue | null>(null)
 
@@ -14,6 +14,7 @@ export type CartContextValue = {
   addItem: (product: Product.Type) => void
   removeItem: (productId: Product.Type['id']) => void
   updateQuantity: (productId: Product.Type['id'], quantity: number) => void
+  clearCart: () => void
 }
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
@@ -35,18 +36,23 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     )
   }
 
+  const clearCart = () => {
+    setCart(Cart.create())
+  }
+
   const contextValue: CartContextValue = useMemo(
     () => ({
       cart,
       addItem,
       removeItem,
       updateQuantity,
+      clearCart,
       shipping: Cart.calculateShipping(cart),
       subtotal: Cart.calculateSubtotal(cart),
       tax: Cart.calculateTax(cart),
       total: Cart.calculateTotal(cart),
     }),
-    [cart, addItem, removeItem, updateQuantity],
+    [cart, addItem, removeItem, updateQuantity, clearCart],
   )
 
   return (

@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { orderApi } from '../services/api'
-import { calculateShipping, calculateTax, getCartFromStorage } from '../services/cart'
 import type { CartItem } from '../services/api'
 import { Button } from '@/ui/components/ui/button'
 import { Input } from '@/ui/components/ui/input'
 import { Label } from '@/ui/components/ui/label'
 import { TypographyHeading } from '@/ui/components/ui/typography'
+import { useCart } from '@/ui/cart/hooks/useCart'
 
 export const Route = createFileRoute('/checkout')({
   component: CheckoutPage,
@@ -16,7 +16,7 @@ function CheckoutPage() {
   const navigate = useNavigate()
 
   const [currentStep, setCurrentStep] = useState(1)
-  const [cartItems, setCartItems] = useState<Array<CartItem>>([])
+  const [cartItems] = useState<Array<CartItem>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [firstName, setFirstName] = useState('')
@@ -29,31 +29,13 @@ function CheckoutPage() {
   const [expiry, setExpiry] = useState('')
   const [cvv, setCvv] = useState('')
 
-  const [subtotal, setSubtotal] = useState(0)
-  const [tax, setTax] = useState(0)
-  const [shipping, setShipping] = useState(0)
-  const [total, setTotal] = useState(0)
+  const { cart, subtotal, tax, shipping, total } = useCart()
 
   useEffect(() => {
-    const cart = getCartFromStorage()
-    if (cart.length === 0) {
+    if (cart.lineItems.length === 0) {
       navigate({ to: '/' })
       return
     }
-
-    setCartItems(cart)
-
-    const calculatedSubtotal = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    )
-    const calculatedTax = calculateTax(calculatedSubtotal)
-    const calculatedShipping = calculateShipping(calculatedSubtotal)
-
-    setSubtotal(calculatedSubtotal)
-    setTax(calculatedTax)
-    setShipping(calculatedShipping)
-    setTotal(calculatedSubtotal + calculatedTax + calculatedShipping)
   }, [navigate])
 
   const validateStep1 = () => {
