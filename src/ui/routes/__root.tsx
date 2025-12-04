@@ -20,7 +20,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         <Header />
         <Outlet />
       </CartProvider>
-      <Toaster richColors position="top-right" />
+
+      <Toaster richColors position="top-center" offset={{ top: '50px' }} />
 
       <TanstackDevtools
         config={{

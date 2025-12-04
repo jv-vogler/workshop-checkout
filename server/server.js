@@ -81,11 +81,11 @@ const products = [
   },
   {
     id: 3,
-    name: 'Laptop Stand',
+    name: 'Black Wireless Mouse',
     price: 49.99,
     image:
       'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=300&fit=crop',
-    description: 'Adjustable aluminum laptop stand',
+    description: 'Wireless mouse with 1000 DPI sensor and 1000Hz polling rate',
     stock: 20,
     category: 'accessories',
   },
@@ -198,10 +198,20 @@ fastify.get(
   },
 )
 
+const shouldCheckoutFail = false
+
 fastify.post(
   '/api/orders',
   { schema: orderSchemas.createOrder },
   async (request, reply) => {
+    if (shouldCheckoutFail) {
+      reply.code(500)
+      return {
+        success: false,
+        error: 'Internal Server Error',
+      }
+    }
+
     await simulateDelay()
 
     const { items, customerInfo, shippingInfo, paymentInfo, totals } =

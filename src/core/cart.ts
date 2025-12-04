@@ -97,7 +97,7 @@ export namespace Cart {
   }
 
   export const calculateTax = (cart: Type): number => {
-    return calculateSubtotal(cart) * TAX_RATE
+    return Number((calculateSubtotal(cart) * TAX_RATE).toFixed(2))
   }
 
   export const calculateShipping = (cart: Type): number => {

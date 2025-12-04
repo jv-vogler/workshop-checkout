@@ -1,7 +1,7 @@
 import useLocalStorageState from 'use-local-storage-state'
 import { createContext, useMemo } from 'react'
+import type { Product } from '@/core/product'
 import { Cart } from '@/core/cart'
-import { Product } from '@/core/product'
 
 export const CartContext = createContext<CartContextValue | null>(null)
 
