@@ -13,7 +13,7 @@ import { Cart } from '@/core/cart'
 
 export const Route = createFileRoute('/')({ component: IndexPage })
 
-function IndexPage() {
+export function IndexPage() {
   const { addItem } = useCart()
   const { filters, debouncedFilters, setFilters } = useProductFilters()
   const { products, error, isLoadingProducts } = useProducts({
